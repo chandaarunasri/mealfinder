@@ -30,7 +30,7 @@
   <!-- Side Menu -->
   <div id="sideMenu" class="fixed top-0 -right-64 flex-col bg-white w-64 h-full shadow-lg p-5 overflow-y-auto z-50">
     <div class="flex justify-between items-center border-b pb-2">
-      <span class="text-lg font-bold">Categories</span>
+      <span class="text-lg font-bold"></span>
       <button id="closeMenu" class="text-red-500 text-xl">
         <i class="bi bi-x-circle"></i>
       </button>
@@ -40,7 +40,7 @@
 
   <!-- Header Search Area -->
   <div id="searchArea"
-    class="bg-opacity-50 flex justify-center items-center h-[350px] bg-[url('./image/images.jpeg')] bg-cover bg-center bg-no-repeat">
+    class="bg-opacity-50 flex justify-center items-center h-[350px] bg-[url('./image/pexels-ella-olsson-572949-1640774.jpg')] bg-cover bg-center bg-no-repeat">
     <div>
       <div class="flex justify-center mb-6 pt-10">
         <input type="text" id="searchInput" placeholder="Search recipes here ..."
@@ -57,7 +57,7 @@
     </div>
   </div>
 
-  <!-- Categories -->
+  <!-- Categories  -->
   <div id="categoriesWithThumb">
     <div class="max-w-7xl mx-auto px-4 py-8">
       <div class="mb-6">
@@ -101,35 +101,17 @@
       sideMenu.classList.add("-right-64");
     });
 
-    // Fetch categories
+    // ✅ Fetch categories
     fetch("https://www.themealdb.com/api/json/v1/1/categories.php")
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok " + response.statusText);
-        }
-        return response.json();
-      })
+      .then(res => res.json())
       .then(data => {
         const categories = data.categories;
 
-        // Add Close Button to side menu
-        const closeItem = document.createElement("li");
-        closeItem.className = "flex justify-end px-2";
-        const closeBtn = document.createElement("button");
-        closeBtn.innerHTML = '<i class="bi bi-x-circle text-gray-500 hover:text-red-500 text-md"></i>';
-        closeBtn.addEventListener("click", () => {
-          categoriesMenu.classList.add("hidden");
-        });
-        closeItem.appendChild(closeBtn);
-        categoriesMenu.appendChild(closeItem);
-
-        // Add each category
         categories.forEach(category => {
           // Side Menu Item
           const listItem = document.createElement("li");
           listItem.className =
             "block text-gray-700 text-sm px-4 hover:bg-gray-100 cursor-pointer hover:text-orange-500 border-b";
-          listItem.id = `category-${category.idCategory}`;
           listItem.textContent = category.strCategory;
           listItem.onclick = () => loadCategory(category.strCategory);
           categoriesMenu.appendChild(listItem);
@@ -137,8 +119,6 @@
           // Category Thumbnails
           const categoryThumb = document.createElement("div");
           categoryThumb.className = "bg-white shadow-lg relative text-center cursor-pointer hover:shadow-xl rounded";
-          categoryThumb.id = `category-${category.idCategory}Thumb`;
-
           const thumbImage = document.createElement("img");
           thumbImage.src = category.strCategoryThumb;
           thumbImage.alt = category.strCategory;
@@ -154,21 +134,14 @@
           categoryThumb.onclick = () => loadCategory(category.strCategory);
           categoriesList.appendChild(categoryThumb);
         });
-      })
-      .catch(error => {
-        console.error("There was a problem with the fetch operation:", error);
-        const errorItem = document.createElement("li");
-        errorItem.textContent = "Failed to load categories.";
-        errorItem.className = "px-4 py-2 text-red-500";
-        categoriesMenu.appendChild(errorItem);
       });
 
-    // Load Category
+    // Load Category (with description + meals)
     function loadCategory(category) {
       categorySection.classList.remove("hidden");
       mealDetailsSection.classList.add("hidden");
 
-      // Category description
+      // Get category description
       fetch("https://www.themealdb.com/api/json/v1/1/categories.php")
         .then(res => res.json())
         .then(data => {
@@ -181,7 +154,7 @@
           `;
         });
 
-      // Meals in category
+      // Get meals for category
       fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`)
         .then(res => res.json())
         .then(data => {
@@ -202,7 +175,7 @@
         });
     }
 
-    // Load Meal Details
+    // Load Meal Details (with back button to category)
     function loadMealDetails(id, category) {
       categorySection.classList.add("hidden");
       mealDetailsSection.classList.remove("hidden");
