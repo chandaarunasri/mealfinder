@@ -139,6 +139,78 @@
         });
       });
 
+    // ========== ROUTER ==========
+    window.addEventListener("hashchange", handleRoute);
+    window.addEventListener("load", handleRoute);
+
+    function handleRoute() {
+      const hash = location.hash.substring(1); // remove #
+      if (!hash) {
+        // HOME view
+        searchArea.classList.remove("hidden");
+        categoriesWithThumb.classList.remove("hidden");
+        categorySection.classList.add("hidden");
+        mealDetailsSection.classList.add("hidden");
+        return;
+      }
+
+      const params = new URLSearchParams(hash);
+
+      if (params.has("category")) {
+        const category = params.get("category");
+        loadCategory(category);
+      } else if (params.has("meal")) {
+        const mealId = params.get("meal");
+        const category = params.get("cat");
+        loadMealDetails(mealId, category);
+      }
+    }
+
+    // Show Category
+    function loadCategory(category) {
+      searchArea.classList.add("hidden");
+      categoriesWithThumb.classList.add("hidden");
+      categorySection.classList.remove("hidden");
+      mealDetailsSection.classList.add("hidden");
+
+      // Get category description
+      fetch("https://www.themealdb.com/api/json/v1/1/categories.php")
+        .then(res => res.json())
+        .then(data => {
+          const cat = data.categories.find(c => c.strCategory === category);
+          if (cat) {
+            categoryDescription.innerHTML = `
+              <div class="bg-white shadow rounded p-4">
+                <h2 class="text-2xl font-bold text-orange-600">${cat.strCategory}</h2>
+                <p class="mt-2 text-gray-700">${cat.strCategoryDescription}</p>
+              </div>
+            `;
+          }
+        });
+
+      // Get meals for category
+      fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`)
+        .then(res => res.json())
+        .then(data => {
+          mealsContainer.innerHTML = "";
+          data.meals.forEach(meal => {
+            const card = document.createElement("div");
+            card.className = "bg-white shadow rounded overflow-hidden";
+            card.innerHTML = `
+              <img src="${meal.strMealThumb}" class="w-full h-40 object-cover">
+              <div class="p-4">
+                <h3 class="font-bold">${meal.strMeal}</h3>
+                <button class="mt-2 bg-orange-500 text-white px-3 py-1 rounded text-sm">View Details</button>
+              </div>
+            `;
+            card.querySelector("button").onclick = () => {
+              location.hash = `meal=${meal.idMeal}&cat=${category}`;
+            };
+            mealsContainer.appendChild(card);
+          });
+        });
+    }
+
     
   </script>
 </body>
