@@ -237,7 +237,35 @@
             }
           }
 
-          
+          // instructions into steps with check icon
+          let instructionsHTML = "";
+          if (meal.strInstructions) {
+            const steps = meal.strInstructions.split(/\r?\n/).filter(step => step.trim() !== "");
+            instructionsHTML = steps.map(step => `
+              <p class="flex items-start gap-2 mb-2">
+                <i class="fa-solid fa-square-check text-orange-500 mt-1"></i>
+                <span>${step}</span>
+              </p>
+            `).join("");
+          }
+
+          mealDetails.innerHTML = `
+            <button onclick="location.hash='category=${category}'" class="mb-4 bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+              ← Back
+            </button>
+            <h2 class="text-2xl font-bold mb-4 text-orange-600">${meal.strMeal}</h2>
+            <img src="${meal.strMealThumb}" class="w-full max-w-lg rounded mb-4"/>
+
+            <p><strong>Category:</strong> ${meal.strCategory}</p>
+            <p><strong>Area:</strong> ${meal.strArea}</p>
+            <p><strong>Tags:</strong> ${meal.strTags ? meal.strTags : "None"}</p>
+
+            <h3 class="mt-4 font-semibold text-lg">Ingredients</h3>
+            <ul class="mt-2 mb-4">${ingredientsHTML}</ul>
+
+            <h3 class="mt-4 font-semibold text-lg">Instructions</h3>
+            <div class="mt-2 text-gray-700 leading-relaxed">${instructionsHTML}</div>
+          `;
         });
     }
   </script>
