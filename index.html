@@ -5,15 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Meal Finder</title>
 
-  <!-- Tailwind & Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-  
   <style>
-    /* Animations for side menu */
-    #sideMenu {
-      transition: right 0.3s ease-in-out;
+    #sideMenu {transition: right 0.3s ease-in-out;}
+    .ingredient-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.75rem;  /* w-7 */
+      height: 1.75rem; /* h-7 */
+      border-radius: 9999px; /* rounded-full */
+      background-color: #06b6d4; /* bg-cyan-500 */
+      color: white;
+      font-weight: bold;
+      font-size: 0.875rem; /* text-sm */
+      margin-right: 0.4rem;
     }
   </style>
 </head>
@@ -100,7 +108,7 @@
     const searchArea = document.getElementById("searchArea");
     const categoriesWithThumb = document.getElementById("categoriesWithThumb");
 
-    // Side menu toggle
+    // side menu toggle
     menuBtn.addEventListener("click", () => {
       sideMenu.classList.remove("-right-64");
       sideMenu.classList.add("right-0");
@@ -110,27 +118,38 @@
       sideMenu.classList.add("-right-64");
     });
 
-    // Load categories
+    // Load categories on home
     fetch("https://www.themealdb.com/api/json/v1/1/categories.php")
       .then((res) => res.json())
       .then((data) => {
         const categories = data.categories;
         categories.forEach((category) => {
+          // Side Menu Item
           const listItem = document.createElement("li");
-          listItem.className = "block text-gray-700 text-sm px-4 hover:bg-gray-100 cursor-pointer hover:text-orange-500 border-b";
+          listItem.className =
+            "block text-gray-700 text-sm px-4 hover:bg-gray-100 cursor-pointer hover:text-orange-500 border-b";
           listItem.textContent = category.strCategory;
           listItem.onclick = () => {
             location.hash = `category=${category.strCategory}`;
           };
           categoriesMenu.appendChild(listItem);
 
+          // Category Thumbnails
           const categoryThumb = document.createElement("div");
-          categoryThumb.className = "bg-white shadow-lg relative text-center cursor-pointer hover:shadow-xl rounded";
-          categoryThumb.innerHTML = `
-            <img src="${category.strCategoryThumb}" alt="${category.strCategory}" class="w-full h-32 object-cover p-2"/>
-            <div class="absolute py-1 px-2 text-sm text-white bg-orange-500 rounded top-0 right-0 m-1">
-              ${category.strCategory}
-            </div>`;
+          categoryThumb.className =
+            "bg-white shadow-lg relative text-center cursor-pointer hover:shadow-xl rounded";
+          const thumbImage = document.createElement("img");
+          thumbImage.src = category.strCategoryThumb;
+          thumbImage.alt = category.strCategory;
+          thumbImage.className = "w-full h-32 object-cover p-2";
+
+          const thumbTitle = document.createElement("div");
+          thumbTitle.textContent = category.strCategory;
+          thumbTitle.className =
+            "absolute py-1 px-2 text-sm text-white bg-orange-500 rounded top-0 right-0 m-1";
+
+          categoryThumb.appendChild(thumbImage);
+          categoryThumb.appendChild(thumbTitle);
           categoryThumb.onclick = () => {
             location.hash = `category=${category.strCategory}`;
           };
@@ -153,14 +172,18 @@
       }
 
       const params = new URLSearchParams(hash);
+
       if (params.has("category")) {
-        loadCategory(params.get("category"));
+        const category = params.get("category");
+        loadCategory(category);
       } else if (params.has("meal")) {
-        loadMealDetails(params.get("meal"));
+        const mealId = params.get("meal");
+        const category = params.get("cat");
+        loadMealDetails(mealId, category);
       }
     }
 
-    // Load category
+    // Show Category
     function loadCategory(category) {
       searchArea.classList.add("hidden");
       categoriesWithThumb.classList.add("hidden");
@@ -170,13 +193,16 @@
       fetch("https://www.themealdb.com/api/json/v1/1/categories.php")
         .then((res) => res.json())
         .then((data) => {
-          const categ = data.categories.find((c) => c.strCategory === category);
+          const categ = data.categories.find(
+            (c) => c.strCategory === category
+          );
           if (categ) {
             categoryDescription.innerHTML = `
               <div class="bg-white shadow rounded p-4">
                 <h2 class="text-2xl font-bold text-orange-600">${categ.strCategory}</h2>
                 <p class="mt-2 text-gray-700">${categ.strCategoryDescription}</p>
-              </div>`;
+              </div>
+            `;
           }
         });
 
@@ -194,17 +220,18 @@
                 <button class="mt-2 bg-orange-500 text-white px-3 py-1 rounded text-sm">
                   View Details
                 </button>
-              </div>`;
+              </div>
+            `;
             card.querySelector("button").onclick = () => {
-              location.hash = `meal=${meal.idMeal}`;
+              location.hash = `meal=${meal.idMeal}&cat=${category}`;
             };
             mealsContainer.appendChild(card);
           });
         });
     }
 
-    // Load meal details
-    function loadMealDetails(id) {
+    // Show Meal Details 
+    function loadMealDetails(id, category) {
       searchArea.classList.add("hidden");
       categoriesWithThumb.classList.add("hidden");
       categorySection.classList.add("hidden");
@@ -214,45 +241,58 @@
         .then((res) => res.json())
         .then((data) => {
           const meal = data.meals[0];
-          const ingredientsArr = [], measuresArr = [];
+
+          // Gather ingredients and measures for grid display 
+          const ingredientsArr = [],
+                measuresArr = [];
           for (let i = 1; i <= 20; i++) {
             const ing = meal[`strIngredient${i}`], meas = meal[`strMeasure${i}`];
-            if (ing && ing.trim()) ingredientsArr.push(ing);
-            if (meas && meas.trim()) measuresArr.push(meas);
+            if (ing && ing.trim() !== "") ingredientsArr.push(ing);
+            if (meas && meas.trim() !== "") measuresArr.push(meas);
           }
 
-          let ingredientsHTML = '<div class="bg-orange-500 rounded px-5 py-5"><h3 class="font-bold text-lg mb-3 text-white">Ingredients</h3><div class="grid grid-cols-2 gap-y-2">';
+          // Ingredients in orange box, 2 columns, blue numbered circles
+          let ingredientsHTML = '<div class="bg-orange-600 rounded px-5 py-5"><h3 class="font-bold text-lg mb-3 text-white">Ingredients</h3><div class="grid grid-cols-2 gap-y-2">';
           ingredientsArr.forEach((ing, idx) => {
             ingredientsHTML += `
               <div class="flex items-center mb-2">
-                <span class="flex items-center justify-center w-7 h-7 rounded-full bg-cyan-500 text-white font-bold text-sm mr-2">${idx+1}</span>
+                <span class="ingredient-circle">${idx+1}</span>
                 <span class="text-white">${ing}</span>
               </div>`;
           });
           ingredientsHTML += '</div></div>';
 
-          let measuresHTML = '<div class="border border-gray-600 bg-white rounded px-4 py-3"><span class="font-bold block mb-2 text-gray-600">Measure:</span><div class="grid grid-cols-2 gap-y-2">';
-          measuresArr.forEach((m) => {
+          // Measures in white box
+          let measuresHTML = '<div class="border border-gray-700 bg-white rounded px-4 py-3"><span class="font-bold block mb-2 text-gray-600">Measure:</span><div class="grid grid-cols-2 gap-y-2">';
+          measuresArr.forEach((m,i) => {
             measuresHTML += `<div class="flex items-center mb-1"><i class="fa-solid fa-spoon text-orange-500 mr-2"></i> ${m}</div>`;
           });
           measuresHTML += '</div></div>';
 
-          let instructionsHTML = "";
-          if (meal.strInstructions) {
-            const steps = meal.strInstructions.split(/\r?\n/).filter(s => s.trim());
-            instructionsHTML = steps.map(step => `
-              <p class="flex items-start gap-2 mb-2">
-                <i class="fa-regular fa-square-check text-orange-500 mt-1"></i>
-                <span>${step}</span>
-              </p>`).join("");
+          // Tags
+          let tagHTML = '';
+          if(meal.strTags) {
+            tagHTML = meal.strTags.split(',').map(t=>`<span class="inline-block rounded bg-orange-50 border border-orange-600 px-2 py-1 text-xs text-orange-600 font-semibold mr-2 mb-1">${t}</span>`).join('');
           }
 
-          let tagHTML = meal.strTags ? meal.strTags.split(',').map(t => `
-            <span class="inline-block rounded bg-orange-50 border border-orange-600 px-2 py-1 text-xs text-orange-600 font-semibold mr-2 mb-1">${t}</span>`).join('') : '';
+          let instructionsHTML = "";
+          if (meal.strInstructions) {
+            const steps = meal.strInstructions.split(/\r?\n/).filter((step) => step.trim() !== "");
+            instructionsHTML = steps.map(
+              (step) => `
+                <p class="flex items-start gap-2 mb-2">
+                  <i class="fa-regular fa-square-check text-orange-500 mt-1"></i>
+                  <span>${step}</span>
+                </p>
+              `
+            ).join("");
+          }
 
+          // Source link
           let sourceHTML = meal.strSource ? `<span class="font-bold">Source:</span>
-            <a href="${meal.strSource}" target="_blank" class="text-blue-700 underline break-all">${meal.strSource}</a>` : '';
+           <a href="${meal.strSource}" target="_blank" class="text-blue-700 underline break-all">${meal.strSource}</a>` : '';
 
+          // Info layout
           mealDetails.innerHTML = `
             <div class="flex flex-col md:flex-row gap-x-10 gap-y-6">
               <div class="md:w-1/2 flex flex-col items-center">
@@ -262,24 +302,24 @@
               <div class="md:w-1/2 mt-2 md:mt-0 flex flex-col">
                 <div>
                   <div class="mb-2"><span class="font-bold">CATEGORY:</span> <span class="uppercase">${meal.strCategory || ''}</span></div>
-                  ${sourceHTML ? `<div class="mb-2">${sourceHTML}</div>` : ''}
+                  ${sourceHTML?`<div class="mb-2">${sourceHTML}</div>`:''}
                   ${meal.strArea ? `<div class="mb-2"><span class="font-bold">Area:</span> <span>${meal.strArea}</span></div>` : ''}
-                  ${tagHTML ? `<div class="mb-2"><span class="font-bold">Tags:</span> ${tagHTML}</div>` : ''}
+                  ${tagHTML?`<div class="mb-2"><span class="font-bold">Tags:</span> ${tagHTML}</div>`:''}
                 </div>
                 <div class="mt-5">${ingredientsHTML}</div>
               </div>
             </div>
             <h3 class="mt-8 font-semibold text-lg">Instructions</h3>
-            <div class="mt-2 text-gray-600 leading-relaxed">${instructionsHTML}</div>
+            <div class="mt-2 text-gray-700 leading-relaxed">${instructionsHTML}</div>
             <div class="mt-10">
               <div class="mb-2 flex items-end gap-2">
                 <h3 class="text-lg font-bold tracking-widest">CATEGORIES</h3>
               </div>
               <hr class="w-20 h-1 bg-orange-500 mb-6" />
               <div id="allCategories" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-            </div>`;
+            </div>
+          `;
 
-          // Load categories again
           fetch("https://www.themealdb.com/api/json/v1/1/categories.php")
             .then((res) => res.json())
             .then((catData) => {
@@ -287,12 +327,14 @@
               catContainer.innerHTML = "";
               catData.categories.forEach((cat) => {
                 const catCard = document.createElement("div");
-                catCard.className = "bg-white shadow-lg relative text-center cursor-pointer hover:shadow-xl rounded";
+                catCard.className =
+                  "bg-white shadow-lg relative text-center cursor-pointer hover:shadow-xl rounded";
                 catCard.innerHTML = `
                   <img src="${cat.strCategoryThumb}" class="w-full h-32 object-cover p-2" />
                   <div class="absolute py-1 px-2 text-sm text-white bg-orange-500 rounded top-0 right-0 m-1">
                     ${cat.strCategory}
-                  </div>`;
+                  </div>
+                `;
                 catCard.onclick = () => {
                   location.hash = `category=${cat.strCategory}`;
                 };
