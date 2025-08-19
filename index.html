@@ -211,7 +211,35 @@
         });
     }
 
-    
+    // Show Meal Details
+    function loadMealDetails(id, category) {
+      searchArea.classList.add("hidden");
+      categoriesWithThumb.classList.add("hidden");
+      categorySection.classList.add("hidden");
+      mealDetailsSection.classList.remove("hidden");
+
+      fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`)
+        .then(res => res.json())
+        .then(data => {
+          const meal = data.meals[0];
+
+          let ingredientsHTML = "";
+          for (let i = 1; i <= 20; i++) {
+            const ingredient = meal[`strIngredient${i}`];
+            const measure = meal[`strMeasure${i}`];
+            if (ingredient && ingredient.trim() !== "") {
+              ingredientsHTML += `
+                <li class="flex justify-between border-b py-1">
+                  <span>${ingredient}</span>
+                  <span class="text-gray-600">${measure}</span>
+                </li>
+              `;
+            }
+          }
+
+          
+        });
+    }
   </script>
 </body>
 </html>
