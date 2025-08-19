@@ -221,7 +221,7 @@
             if (meas && meas.trim()) measuresArr.push(meas);
           }
 
-          let ingredientsHTML = '<div class="bg-orange-600 rounded px-5 py-5"><h3 class="font-bold text-lg mb-3 text-white">Ingredients</h3><div class="grid grid-cols-2 gap-y-2">';
+          let ingredientsHTML = '<div class="bg-orange-500 rounded px-5 py-5"><h3 class="font-bold text-lg mb-3 text-white">Ingredients</h3><div class="grid grid-cols-2 gap-y-2">';
           ingredientsArr.forEach((ing, idx) => {
             ingredientsHTML += `
               <div class="flex items-center mb-2">
@@ -231,7 +231,7 @@
           });
           ingredientsHTML += '</div></div>';
 
-          let measuresHTML = '<div class="border border-gray-700 bg-white rounded px-4 py-3"><span class="font-bold block mb-2 text-gray-600">Measure:</span><div class="grid grid-cols-2 gap-y-2">';
+          let measuresHTML = '<div class="border border-gray-600 bg-white rounded px-4 py-3"><span class="font-bold block mb-2 text-gray-600">Measure:</span><div class="grid grid-cols-2 gap-y-2">';
           measuresArr.forEach((m) => {
             measuresHTML += `<div class="flex items-center mb-1"><i class="fa-solid fa-spoon text-orange-500 mr-2"></i> ${m}</div>`;
           });
@@ -270,7 +270,7 @@
               </div>
             </div>
             <h3 class="mt-8 font-semibold text-lg">Instructions</h3>
-            <div class="mt-2 text-gray-700 leading-relaxed">${instructionsHTML}</div>
+            <div class="mt-2 text-gray-600 leading-relaxed">${instructionsHTML}</div>
             <div class="mt-10">
               <div class="mb-2 flex items-end gap-2">
                 <h3 class="text-lg font-bold tracking-widest">CATEGORIES</h3>
