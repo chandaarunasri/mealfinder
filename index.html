@@ -9,16 +9,18 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <style>
     #sideMenu { transition: right 0.3s ease-in-out; }
+
+    /* ingredient-circle styles using Tailwind classes at HTML usage */
     .ingredient-circle {
       display: inline-flex;
       margin-right: 0.5rem;
-      width: 1.75rem;
-      height: 1.75rem;
+      width: 1.75rem;  /* 7 */
+      height: 1.75rem; /* 7 */
       border-radius: 9999px;
-      background-color: #06b6d4;
+      background-color: #06b6d4; /* bg-cyan-500 */
       color: white;
       font-weight: 700;
-      font-size: 0.875rem;
+      font-size: 0.875rem; /* text-sm */
       align-items: center;
       justify-content: center;
     }
@@ -68,15 +70,11 @@
       </div>
     </div>
   </div>
-
-  <!-- Search results will appear below header  -->
-  <div id="searchResultArea" class="max-w-7xl mx-auto px-4 py-8"></div>
-
-  <!-- Categories  -->
+  <!-- Categories Grid -->
   <div id="categoriesWithThumb">
     <div class="max-w-7xl mx-auto px-4 py-8">
       <div class="mb-6">
-        <h2 class="text-xl font-bold mt-6 mb-1">CATEGORIES</h2>
+        <h2 class="text-xl font-bold mt-6 mb-1"> C A T E G O R I E S </h2>
         <hr id="underline" class="w-20 h-1 bg-orange-500" />
       </div>
       <div id="categoriesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
@@ -91,8 +89,6 @@
   <section id="mealDetailsSection" class="px-6 py-8 hidden">
     <div id="mealDetails" class="bg-white shadow rounded-lg p-6"></div>
   </section>
-
-
-  <script src="./api.js"></script>
+  <script src="./api.js"> </script>
 </body>
 </html>
